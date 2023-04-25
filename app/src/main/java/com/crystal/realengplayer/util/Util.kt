@@ -1,6 +1,21 @@
 package com.crystal.realengplayer.util
 
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.activity.ComponentActivity
 import java.util.concurrent.TimeUnit
+
+
+
+fun Context.findActivity(): ComponentActivity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is ComponentActivity) return context
+        context = context.baseContext
+    }
+    return null
+}
+
 
 
 fun Long.formatMinSec(): String {

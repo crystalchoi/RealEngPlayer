@@ -15,53 +15,74 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key.Companion.Home
 import androidx.compose.ui.tooling.preview.Preview
 import com.crystal.realengplayer.data.RealEngEpisodeManager
 import com.crystal.realengplayer.data.TEST_MP4_URI_STRING
 import com.crystal.realengplayer.ui.theme.RealEngPlayerTheme
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.crystal.realengplayer.data.TEST_MP3_URI_STRING
+import com.crystal.realengplayer.ui.screen.Basic
+import com.crystal.realengplayer.ui.screen.Home
+import com.crystal.realengplayer.ui.screen.Settings
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
+        hideSystemUI()
         setContent {
             RealEngPlayerTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-//                    VideoPlayer(uri = RealEngEpisodeManager.getUri(1))
-                    Log.d("TAG", TEST_MP3_URI_STRING)
-                    CustomExoPlayer(uri = TEST_MP4_URI_STRING)
+
+//                val systemUiController = rememberSystemUiController()
+//                SideEffect {
+//                    systemUiController.setStatusBarColor(Color.Transparent, darkIcons = true)
+//                    systemUiController.setNavigationBarColor(Color.Transparent, darkIcons = true)
+//                }
+
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = "home") {
+                    composable("home") {
+                        Home(navController)
+                    }
+                    composable("basic") {
+                        Basic(navController)
+                    }
+                    composable("settings") {
+                        Settings(navController)
+                    }
+
                 }
             }
         }
-//        hideSystemUI()
     }
 
 
-//    fun hideSystemUI() {
-//
-//        //Hides the ugly action bar at the top
-//        actionBar?.hide()
-//
-//        //Hide the status bars
-//
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
-//
-//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-//            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-//        } else {
-//            window.insetsController?.apply {
-//                hide(WindowInsets.Type.statusBars())
-//                systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-//            }
-//        }
-//    }
+    fun hideSystemUI() {
+        //Hides the ugly action bar at the top
+        actionBar?.hide()
+
+        //Hide the status bars
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        } else {
+            window.insetsController?.apply {
+                hide(WindowInsets.Type.statusBars())
+                systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        }
+    }
 
 }
 

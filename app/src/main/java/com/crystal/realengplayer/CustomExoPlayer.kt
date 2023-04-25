@@ -1,11 +1,14 @@
 package com.crystal.realengplayer
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View.inflate
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
@@ -24,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -35,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,6 +49,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
@@ -67,6 +73,7 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import com.crystal.realengplayer.data.TEST_MP4_URI_STRING
 import com.crystal.realengplayer.databinding.ExoPlayerAbbrBinding
 import com.crystal.realengplayer.ui.theme.RealEngPlayerTheme
+import com.crystal.realengplayer.util.findActivity
 import kotlinx.coroutines.coroutineScope
 import java.security.AccessController.getContext
 
@@ -79,7 +86,25 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
 ) {
 
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val isLandscape= configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
+    var isFullModeOn by remember { mutableStateOf(false) }
+    val activity = LocalContext.current.findActivity()!!
+    val enterLandscapeScreen = {
+        activity.requestedOrientation =
+                ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
+    }
+    val exitLandscapeScreen = {
+        @SuppressLint("SourceLockedOrientationActivity")
+        // Will reset to SCREEN_ORIENTATION_USER later
+        activity.requestedOrientation =
+             ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
+//        ActivityInfo.SCREEN_ORIENTATION_USER
+    }
+    //a.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+    Log.d("TAG", "activity.requestedOrientation: ${activity.requestedOrientation as Int}");
+    Log.d("TAG", "isFullModeOn: $isFullModeOn, isLandscape: $isLandscape")
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context)
@@ -109,7 +134,7 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
     }
 
 
-    var shouldShowControls by remember { mutableStateOf(true) }
+    var shouldShowControls by remember { mutableStateOf(false) }
 
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
 
@@ -120,9 +145,10 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
     var bufferedPercentage by remember { mutableStateOf(0) }
 
     var playbackState by remember { mutableStateOf(exoPlayer.playbackState) }
-    var isFullModeOn by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier) {
+
+
+    Box(modifier = modifier.fillMaxWidth()) {
         DisposableEffect(key1 = Unit) {
             val listener =
                 object : Player.Listener {
@@ -178,50 +204,52 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
 //            }
 //        )
 
-        AndroidView(
-            modifier =
-            Modifier
-                .clickable {
-                    shouldShowControls = shouldShowControls.not()
-                }
-                .aspectRatio(16f / 9f)
-//                .align(alignment = Alignment.Center)
-//                .fillMaxSize()
+        Surface(modifier = Modifier.fillMaxSize().align(alignment = Alignment.TopCenter)) {
 
-            , factory = {
-                PlayerView(context).apply {
+            AndroidView(
+                modifier = Modifier
+                    .clickable {
+                        shouldShowControls = shouldShowControls.not()
+                    }
+                    .aspectRatio(16f / 9f)
+                    .align(alignment = Alignment.Center)
+                    .fillMaxSize(), factory = {
+                    PlayerView(context).apply {
 
 //                    var mediaController = MediaController(this)
 
 
-                    defaultArtwork = ContextCompat.getDrawable(getContext(),
-                        com.crystal.realengplayer.R.drawable.ic_music_note);
-                    player = exoPlayer
-                    useController = false
-//                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        defaultArtwork = ContextCompat.getDrawable(
+                            getContext(),
+                            com.crystal.realengplayer.R.drawable.ic_music_note
+                        );
+                        player = exoPlayer
+                        useController = false
+
+                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 //                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+//                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
 //                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
 //                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
-//                    layoutParams =
-//                        FrameLayout.LayoutParams(
-////                            ViewGroup.LayoutParams.MATCH_PARENT,
-////                            ViewGroup.LayoutParams.MATCH_PARENT
+                        layoutParams =
+                            FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
 //                            ViewGroup.LayoutParams.WRAP_CONTENT,
 //                            ViewGroup.LayoutParams.WRAP_CONTENT,
-//                        )
+                            )
 
-                    // my code
-                    setControllerOnFullScreenModeChangedListener {
-                        if (isFullModeOn) {
-                            Log.d("TAG", "full mode on")
-                        } else  {
-                            Log.d("TAG", "full mode off")
+                        // my code
+                        setControllerOnFullScreenModeChangedListener {
+                            if (isFullModeOn) {
+                                Log.d("TAG", "full mode on")
+                            } else {
+                                Log.d("TAG", "full mode off")
+                            }
                         }
-                    }
 
-                    // stackoverflow code
-                    // https://stackoverflow.com/questions/72102097/jetpack-compose-exoplayer-full-screen
+                        // stackoverflow code
+                        // https://stackoverflow.com/questions/72102097/jetpack-compose-exoplayer-full-screen
 //                    setFullscreenButtonClickListener { isFullScreen ->
 //                        with(context) {
 //                            if (isFullScreen) {
@@ -231,12 +259,14 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
 //                            }
 //                        }
 //                    }
+                    }
                 }
-            }
-        )
-
+            )
+        }
         PlayerControls(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .systemBarsPadding(),
             isVisible = { shouldShowControls },
             isPlaying = { isPlaying },
             title = { exoPlayer.mediaMetadata.displayTitle.toString() },
@@ -269,9 +299,40 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
                 exoPlayer.seekTo(timeMs.toLong())
             },
             isFullModeOn = isFullModeOn,
-            onFullModeToggle = { isFullModeOn = it
-                               },
+            onFullModeToggle = {
+                isFullModeOn = it
+                Log.d("TAG", "isFullModeOn: $isFullModeOn, isLandscape: $isLandscape")
+                if (isFullModeOn) {
+                    enterLandscapeScreen
+                } else {
+                    if (isLandscape) enterLandscapeScreen
+                    else exitLandscapeScreen
+                }
+           },
         )
+    }
+
+    val onBackPressedCallback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                exitLandscapeScreen()
+            }
+        }
+    }
+    val onBackPressedDispatcher = activity.onBackPressedDispatcher
+    DisposableEffect(onBackPressedDispatcher) {
+        onBackPressedDispatcher.addCallback(onBackPressedCallback)
+        onDispose { onBackPressedCallback.remove() }
+    }
+    SideEffect {
+        onBackPressedCallback.isEnabled = isLandscape
+        if (isLandscape) {
+            if (activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_USER) {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
+            }
+        } else {
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
+        }
     }
 }
 
@@ -312,7 +373,9 @@ private fun PlayerControls(
                 onFullModeToggle = onFullModeToggle,
             )
 
-            Column(modifier = Modifier.align(alignment = Alignment.BottomCenter).fillMaxWidth(),
+            Column(modifier = Modifier
+                .align(alignment = Alignment.BottomCenter)
+                .fillMaxWidth(),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -329,7 +392,8 @@ private fun PlayerControls(
                 BottomControls(
                     modifier =
                     Modifier
-                        .fillMaxWidth().padding(top = 8.dp)
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
                         .animateEnterExit(
                             enter =
                             slideInVertically(
@@ -382,7 +446,6 @@ private fun TopControl(modifier: Modifier = Modifier,
                 .size(48.dp)
                 .padding(top = 4.dp, end = 16.dp),
             onClick = {
-                Log.d("TAG", "$isFullModeOn")
                 onFullModeToggle(!isFullModeOn)
             }
 
@@ -391,8 +454,8 @@ private fun TopControl(modifier: Modifier = Modifier,
                 contentScale = ContentScale.Crop,
                 painter = painterResource(
                     id =
-                    if (!isFullModeOn) com.crystal.realengplayer.R.drawable.ic_fullscreen
-                    else com.crystal.realengplayer.R.drawable.ic_fullscreen_exit
+                    if (isFullModeOn) com.crystal.realengplayer.R.drawable.ic_fullscreen_exit
+                    else com.crystal.realengplayer.R.drawable.ic_fullscreen
                 ),
                 contentDescription = "Enter/Exit fullscreen"
             )
