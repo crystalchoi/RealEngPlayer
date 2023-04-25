@@ -87,7 +87,7 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
 
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
-    val isLandscape= configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isLandscape by remember { mutableStateOf(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) }
 
     var isFullModeOn by remember { mutableStateOf(false) }
     val activity = LocalContext.current.findActivity()!!
