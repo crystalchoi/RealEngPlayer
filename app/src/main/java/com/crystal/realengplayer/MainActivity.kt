@@ -29,9 +29,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.crystal.realengplayer.data.TEST_MP3_URI_STRING
-import com.crystal.realengplayer.ui.screen.Basic
+import com.crystal.realengplayer.ui.screen.StarMarked
 import com.crystal.realengplayer.ui.screen.Home
 import com.crystal.realengplayer.ui.screen.Settings
+import com.crystal.realengplayer.ui.screen.NavigationScreen
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
@@ -48,19 +49,7 @@ class MainActivity : ComponentActivity() {
 //                    systemUiController.setNavigationBarColor(Color.Transparent, darkIcons = true)
 //                }
 
-                val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "home") {
-                    composable("home") {
-                        Home(navController)
-                    }
-                    composable("basic") {
-                        Basic(navController)
-                    }
-                    composable("settings") {
-                        Settings(navController)
-                    }
-
-                }
+                NavigationScreen()
             }
         }
     }

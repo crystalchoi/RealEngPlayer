@@ -148,7 +148,7 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
 
 
 
-    Box(modifier = modifier.fillMaxWidth()) {
+    Box(modifier = modifier.fillMaxSize()) {
         DisposableEffect(key1 = Unit) {
             val listener =
                 object : Player.Listener {

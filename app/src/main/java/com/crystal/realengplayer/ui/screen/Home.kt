@@ -1,15 +1,25 @@
 package com.crystal.realengplayer.ui.screen
 
 import android.util.Log
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Icon
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -19,14 +29,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.crystal.realengplayer.CustomExoPlayer
+import com.crystal.realengplayer.R
 import com.crystal.realengplayer.data.TEST_MP3_URI_STRING
 import com.crystal.realengplayer.data.TEST_MP4_URI_STRING
+import com.crystal.realengplayer.ui.theme.RealEngPlayerTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
@@ -100,4 +124,106 @@ fun HideSystemUi()
             //  portrait일떄, SystemBar 위치에 영상이 없으니, 아예 까맣게 보임.
             //  lanscape일때, SystemBar hidden 정상.
     }
+}
+
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NavigationScreen() {
+    val navController = rememberNavController()
+    val menuItems = listOf("Item #1", "Item #2")
+    val scaffoldState = rememberScaffoldState()
+
+    Scaffold(
+        bottomBar = {
+            MainBottomBar(navController)
+        },
+        snackbarHost = {}
+
+    ) {
+
+        NavHost(navController = navController, startDestination = "home",
+            modifier = Modifier.padding(it)) {
+            composable("home") {
+                Home(navController)
+            }
+            composable("starMarked") {
+                StarMarked(navController)
+            }
+            composable("settings") {
+                Settings(navController)
+            }
+
+        }
+    }
+}
+
+
+@Composable
+fun MainBottomBar(navController: NavHostController) {
+    BottomNavigation(
+        modifier = Modifier.height(64.dp)
+    ) {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+        RealEngPlayerScreen.screens.forEach { screen ->
+            BottomNavigationItem(
+                selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                onClick = {
+                    navController.navigate(screen.route) {
+                        launchSingleTop = true
+                    }
+                },
+                label = {
+                    Text(text = stringResource(id = screen.label))
+                },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = screen.icon),
+                        contentDescription = stringResource(id = screen.label),
+                        modifier = Modifier.size(24.dp)
+                    )
+                },
+                alwaysShowLabel = false,
+            )
+        }
+    }
+}
+
+
+
+sealed class RealEngPlayerScreen(
+    val route: String,
+    @StringRes val label: Int,
+    @DrawableRes val icon: Int
+) {
+    companion object {
+        val screens = listOf(
+            Home,
+            StarMarked,
+            Settings
+        )
+
+        const val route_home = "home"
+        const val route_starMarked = "starMarked"
+        const val route_settings = "settings"
+    }
+
+    private object Home : RealEngPlayerScreen(
+        route_home,
+        R.string.home,
+        R.drawable.ic_home
+    )
+
+    private object StarMarked : RealEngPlayerScreen(
+        route_starMarked,
+        R.string.starMarked,
+        R.drawable.ic_star
+    )
+    private object Settings : RealEngPlayerScreen(
+        route_settings,
+        R.string.settings,
+        R.drawable.ic_settings
+    )
 }
