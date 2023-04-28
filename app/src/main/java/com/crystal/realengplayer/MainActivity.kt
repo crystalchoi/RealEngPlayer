@@ -38,10 +38,10 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemUI()
         setContent {
             RealEngPlayerTheme {
+
 
 //                val systemUiController = rememberSystemUiController()
 //                SideEffect {
@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
 
         //Hide the status bars
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)

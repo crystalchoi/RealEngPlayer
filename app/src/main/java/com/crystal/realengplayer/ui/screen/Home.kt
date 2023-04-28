@@ -30,8 +30,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,8 +52,8 @@ import com.crystal.realengplayer.CustomExoPlayer
 import com.crystal.realengplayer.R
 import com.crystal.realengplayer.data.TEST_MP3_URI_STRING
 import com.crystal.realengplayer.data.TEST_MP4_URI_STRING
-import com.crystal.realengplayer.ui.theme.RealEngPlayerTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.launch
 
 
 private val Samples = listOf(
@@ -143,8 +145,10 @@ fun NavigationScreen() {
 
     ) {
 
-        NavHost(navController = navController, startDestination = "home",
-            modifier = Modifier.padding(it)) {
+        NavHost(
+            navController = navController, startDestination = "home",
+            modifier = Modifier.padding(it)
+        ) {
             composable("home") {
                 Home(navController)
             }
@@ -162,8 +166,9 @@ fun NavigationScreen() {
 
 @Composable
 fun MainBottomBar(navController: NavHostController) {
-    BottomNavigation(
-        modifier = Modifier.height(64.dp)
+    BottomNavigation(modifier = Modifier.heightIn(min = 64.dp, max = 128.dp),
+        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.primary
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
@@ -176,13 +181,18 @@ fun MainBottomBar(navController: NavHostController) {
                     }
                 },
                 label = {
-                    Text(text = stringResource(id = screen.label))
+                    Text(text = stringResource(id = screen.label)
+//                        , color = Color.White
+                        , color = MaterialTheme.colorScheme.primary
+                    )
                 },
                 icon = {
                     Icon(
                         painter = painterResource(id = screen.icon),
                         contentDescription = stringResource(id = screen.label),
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .padding(bottom = 4.dp)
+                            .size(24.dp)
                     )
                 },
                 alwaysShowLabel = false,

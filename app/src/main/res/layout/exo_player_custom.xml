@@ -7,7 +7,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
+        android:background="@color/material_dynamic_primary0"
         android:id="@+id/viewShown"
         android:alpha="0.5"/>
 
@@ -60,7 +60,7 @@
             android:includeFontPadding="false"
             android:paddingLeft="4dp"
             android:paddingRight="4dp"
-            android:textColor="@color/white"
+            android:textColor="@color/material_dynamic_primary0"
             android:textSize="14sp"
             android:layout_marginLeft="10dp"
             android:textStyle="bold" />
@@ -72,8 +72,8 @@
             android:layout_weight="1"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            app:played_color="@color/black"
-            app:unplayed_color="@color/white" />
+            app:played_color="@color/material_dynamic_primary0"
+            app:unplayed_color="@color/material_dynamic_neutral0" />
 
         <TextView
             android:id="@id/exo_duration"
@@ -82,7 +82,7 @@
             android:includeFontPadding="false"
             android:paddingLeft="4dp"
             android:paddingRight="4dp"
-            android:textColor="@color/white"
+            android:textColor="@color/material_dynamic_primary0"
             android:textSize="14sp"
             android:layout_marginRight="10dp"
             android:textStyle="bold" />

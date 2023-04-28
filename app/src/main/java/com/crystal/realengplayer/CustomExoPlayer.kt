@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -43,10 +44,12 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalConfiguration
@@ -69,6 +72,7 @@ import com.crystal.realengplayer.util.formatMinSec
 import java.util.concurrent.TimeUnit
 import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaController
+import androidx.media3.session.MediaSession
 import androidx.media3.ui.AspectRatioFrameLayout
 import com.crystal.realengplayer.data.TEST_MP4_URI_STRING
 import com.crystal.realengplayer.databinding.ExoPlayerAbbrBinding
@@ -102,6 +106,13 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
              ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
 //        ActivityInfo.SCREEN_ORIENTATION_USER
     }
+
+    // remember -> rememberSaveable by crystal 20230428
+    var shouldShowControls by remember { mutableStateOf(false) }
+    var totalDuration by remember { mutableStateOf(0L) }
+    var currentTime by remember { mutableStateOf(0L) }
+    var bufferedPercentage by remember { mutableStateOf(0) }
+
     //a.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
     Log.d("TAG", "activity.requestedOrientation: ${activity.requestedOrientation as Int}");
     Log.d("TAG", "isFullModeOn: $isFullModeOn, isLandscape: $isLandscape")
@@ -129,23 +140,14 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
                 prepare()
 
                 playWhenReady = true
-                seekTo(startOffset)
+                val position= if (currentTime> 0) currentTime else startOffset
+                seekTo(position)
             }
     }
 
 
-    var shouldShowControls by remember { mutableStateOf(false) }
-
     var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
-
-    var totalDuration by remember { mutableStateOf(0L) }
-
-    var currentTime by remember { mutableStateOf(0L) }
-
-    var bufferedPercentage by remember { mutableStateOf(0) }
-
     var playbackState by remember { mutableStateOf(exoPlayer.playbackState) }
-
 
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -172,7 +174,7 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
             onDispose {
                 exoPlayer.removeListener(listener)
                 exoPlayer.release()
-                exoPlayer.clearMediaItems()  //??
+                exoPlayer.clearMediaItems()
             }
         }
 
@@ -204,7 +206,9 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
 //            }
 //        )
 
-        Surface(modifier = Modifier.fillMaxSize().align(alignment = Alignment.TopCenter)) {
+        Surface(modifier = Modifier
+            .fillMaxSize()
+            .align(alignment = Alignment.TopCenter)) {
 
             AndroidView(
                 modifier = Modifier
@@ -266,8 +270,8 @@ fun CustomExoPlayer(modifier: Modifier = Modifier,
         PlayerControls(
             modifier = Modifier
                 .fillMaxSize()
-                .systemBarsPadding(),
-            isVisible = { shouldShowControls },
+//                .systemBarsPadding(),
+            , isVisible = { shouldShowControls },
             isPlaying = { isPlaying },
             title = { exoPlayer.mediaMetadata.displayTitle.toString() },
             playbackState = { playbackState },
@@ -457,7 +461,8 @@ private fun TopControl(modifier: Modifier = Modifier,
                     if (isFullModeOn) com.crystal.realengplayer.R.drawable.ic_fullscreen_exit
                     else com.crystal.realengplayer.R.drawable.ic_fullscreen
                 ),
-                contentDescription = "Enter/Exit fullscreen"
+                contentDescription = "Enter/Exit fullscreen",
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primaryContainer),
             )
         }
     }
@@ -478,15 +483,18 @@ private fun CenterControls(
 
     Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceEvenly) {
         IconButton(modifier = Modifier.size(40.dp), onClick = onReplayClick) {
+
             Image(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
                 painter = painterResource(id = com.crystal.realengplayer.R.drawable.ic_replay_5),
-                contentDescription = "Replay 5 seconds"
+                contentDescription = "Replay 5 seconds",
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primaryContainer),
             )
         }
 
-        IconButton(modifier = Modifier.size(40.dp), onClick = onPauseToggle) {
+        IconButton(modifier = Modifier.size(40.dp), onClick = onPauseToggle,
+        ) {
             Image(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
@@ -502,7 +510,8 @@ private fun CenterControls(
                         painterResource(id = R.drawable.exo_icon_play)
                     }
                 },
-                contentDescription = "Play/Pause"
+                contentDescription = "Play/Pause",
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primaryContainer),
             )
         }
 
@@ -511,7 +520,8 @@ private fun CenterControls(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
                 painter = painterResource(id = com.crystal.realengplayer.R.drawable.ic_forward_10),
-                contentDescription = "Forward 10 seconds"
+                contentDescription = "Forward 10 seconds",
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primaryContainer),
             )
         }
     }

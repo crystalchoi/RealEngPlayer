@@ -19,7 +19,7 @@ fun Settings(navController: NavController) {
 fun StarMarked(navController: NavController) {
 
     Text(
-        text = "Settings",
+        text = "StarMarked",
         modifier = Modifier
     )
 

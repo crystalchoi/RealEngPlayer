@@ -3,9 +3,9 @@
     android:height="48dp"
     android:viewportWidth="960"
     android:viewportHeight="960"
-    android:tint="#90CAF9"
+    android:tint="@color/material_dynamic_secondary0"
     >
   <path
-      android:fillColor="@android:color/white"
+      android:fillColor="@color/material_dynamic_secondary0"
       android:pathData="M220,780L370,780L370,530L590,530L590,780L740,780L740,390L480,195L220,390L220,780ZM160,840L160,360L480,120L800,360L800,840L530,840L530,590L430,590L430,840L160,840ZM480,487L480,487L480,487L480,487L480,487L480,487L480,487L480,487L480,487L480,487Z"/>
 </vector>
